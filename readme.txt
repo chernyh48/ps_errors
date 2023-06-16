@@ -7,5 +7,7 @@ pip install -r requirements.txt
 
 Добавляем список прокси в файл proxy.txt в формате: ip:port:user:pass
 
+добавляем в корень приложения файл config.py
+
 Запускаем скрипт:
 python main.py

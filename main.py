@@ -43,15 +43,16 @@ try:
                     try:
                         stdout, stder = process.communicate(timeout=2)
                         data = codecs.decode(stdout)
-                        if data == '000':
+                        if data == '000' or data.split('\n')[1] != '200':
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
                                 result_file += f'\U0000274C {i}'
                             else:
                                 if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] == 0:
                                     data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
+                                    result_file += f'\U000027A1 {i}'
                                 else:
-                                    result_file += f'\U0000274C {i}'
                                     data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
+                                    result_file += f'\U0000274C {i}'
                         else:
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
                                 data_json[f'{proxy.ip}:{proxy.port}'] = {'date_check': datetime.datetime.now().strftime("%d.%m.%Y"),
@@ -65,13 +66,14 @@ try:
                                 data_json[f'{proxy.ip}:{proxy.port}']['count_error'] = 0
                     except subprocess.TimeoutExpired:
                         result_file += f'\U0000274C {i}'
-            if '\U0000274C' in result_file:
+            if '\U0000274C' in result_file or '\U000027A1' in result_file:
                 result += result_file + '\n'
+    print(result)
     if '\U0000274C' in result:
+        bot.send_message(chat_id, f"```\n{result}@anton_4ch```", parse_mode='MarkdownV2')
+    elif '\U000027A1' in result:
         bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
     with open('result.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_json, indent=4))
 except BaseException as f:
     bot.send_message(chat_id, f'\u2757\u2757\u2757 Script error: {f}')
-
-

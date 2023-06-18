@@ -26,6 +26,7 @@ try:
     result = ''
     with open('result.json', 'r', encoding='utf-8') as j:
         data_json = json.load(j)
+    print(data_json)
     for file in os.listdir(r'proxy'):
         result_file = f'{file}\n'
         w = "%{http_code}"
@@ -68,11 +69,12 @@ try:
                         result_file += f'\U0000274C {i}'
             if '\U0000274C' in result_file or '\U000027A1' in result_file:
                 result += result_file + '\n'
-    print(result)
     if '\U0000274C' in result:
-        bot.send_message(chat_id, f"```\n{result}@anton_4ch```", parse_mode='MarkdownV2')
+        bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
+        bot.send_message(chat_id, f"@anton_4ch")
     elif '\U000027A1' in result:
         bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
+    print(data_json)
     with open('result.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_json, indent=4))
 except BaseException as f:

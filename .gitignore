@@ -3,3 +3,4 @@ proxy/proxy.txt
 config.py
 __pycache__/
 /proxy/
+/result.json

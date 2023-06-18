@@ -1,3 +1,5 @@
 .idea/
-proxy.txt
+proxy/proxy.txt
 config.py
+__pycache__/
+/proxy/

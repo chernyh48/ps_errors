@@ -76,6 +76,6 @@ try:
         bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
     print(data_json)
     with open('result.json', 'w', encoding='utf-8') as f:
-        f.write(json.dumps(data_json, indent=4))
+        json.dump(data_json, f, indent=4)
 except BaseException as f:
     bot.send_message(chat_id, f'\u2757\u2757\u2757 Script error: {f}')

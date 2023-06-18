@@ -51,7 +51,7 @@ try:
                                     data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
                                 else:
                                     result_file += f'\U0000274C {i}'
-                                    data_json[f'{proxy.ip}:{proxy.port}']['count_error'] = 0
+                                    data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
                         else:
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
                                 data_json[f'{proxy.ip}:{proxy.port}'] = {'date_check': datetime.datetime.now().strftime("%d.%m.%Y"),
@@ -61,15 +61,17 @@ try:
                                                                          'count_error': proxy.count_error,
                                                                          'count_rotation': proxy.count_rotation,
                                                                          'ip_out': data.split('\n')[0]}
+                            else:
+                                data_json[f'{proxy.ip}:{proxy.port}']['count_error'] = 0
                     except subprocess.TimeoutExpired:
                         result_file += f'\U0000274C {i}'
             if '\U0000274C' in result_file:
-                result += result_file
+                result += result_file + '\n'
     if '\U0000274C' in result:
         bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
     with open('result.json', 'w', encoding='utf-8') as f:
         f.write(json.dumps(data_json, indent=4))
 except BaseException as f:
-    bot.send_message(chat_id, f'\u2757\u2757\u2757 Scrypt error: {f}')
+    bot.send_message(chat_id, f'\u2757\u2757\u2757 Script error: {f}')
 
 

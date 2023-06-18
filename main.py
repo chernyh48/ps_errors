@@ -1,4 +1,6 @@
 import json
+from time import sleep
+
 import telebot
 import codecs
 import shlex
@@ -26,12 +28,12 @@ try:
     result = ''
     with open('result.json', 'r', encoding='utf-8') as j:
         data_json = json.load(j)
-    print(data_json)
     for file in os.listdir(r'proxy'):
         result_file = f'{file}\n'
         w = "%{http_code}"
         with open(f'proxy/{file}', 'r', encoding="utf-8") as f:
             for i in f:
+                sleep(0.2)
                 if '#' in i:
                     result_file += i
                 elif i != '\n' and '#' not in i:
@@ -44,7 +46,8 @@ try:
                     try:
                         stdout, stder = process.communicate(timeout=2)
                         data = codecs.decode(stdout)
-                        if data == '000' or data.split('\n')[1] != '200':
+                        if data.split('\n')[-1] != '200':
+                            print(f'{proxy.ip}:{proxy.port}')
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
                                 result_file += f'\U0000274C {i}'
                             else:
@@ -66,15 +69,18 @@ try:
                             else:
                                 data_json[f'{proxy.ip}:{proxy.port}']['count_error'] = 0
                     except subprocess.TimeoutExpired:
-                        result_file += f'\U0000274C {i}'
+                        if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] == 0:
+                            data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
+                            result_file += f'\U000027A1 {i}'
+                        else:
+                            data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
+                            result_file += f'\U0000274C {i}'
             if '\U0000274C' in result_file or '\U000027A1' in result_file:
                 result += result_file + '\n'
     if '\U0000274C' in result:
         bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
-        bot.send_message(chat_id, f"@anton_4ch")
     elif '\U000027A1' in result:
         bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
-    print(data_json)
     with open('result.json', 'w', encoding='utf-8') as f:
         json.dump(data_json, f, indent=4)
 except BaseException as f:

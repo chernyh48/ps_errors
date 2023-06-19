@@ -41,13 +41,12 @@ try:
                     proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                     curl_url = f'curl -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
                                f'-w {w} https://yandex.ru/internet'
-                    print(curl_url)
                     args = shlex.split(curl_url)
                     process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     try:
                         stdout, stder = process.communicate(timeout=2)
                         data = codecs.decode(stdout)
-                        if data.split('\n')[-1] != '200':
+                        if data == '200':
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
                                 result_file += f'\U0000274C {line}'
                             else:

@@ -58,7 +58,7 @@ try:
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
                                 result_file += f'\U0000274C {line}'
                             else:
-                                if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] <= 2:
+                                if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] <= 1:
                                     data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
                                 else:
                                     data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
@@ -78,7 +78,7 @@ try:
                                 data_json[f'{proxy.ip}:{proxy.port}']['count_error'] = 0
                     except subprocess.TimeoutExpired:
                         logger.warning(f'Timeout error: {proxy.ip}:{proxy.port}')
-                        if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] <= 2:
+                        if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] <= 1:
                             data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
                         else:
                             data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1

@@ -1,5 +1,7 @@
 import json
 import re
+from time import sleep
+
 from loguru import logger
 import telebot
 import codecs
@@ -49,6 +51,7 @@ try:
                     args = shlex.split(curl_url)
                     process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     try:
+                        sleep(1)
                         stdout, stderr = process.communicate(timeout=2)
                         data = codecs.decode(stdout)
                         error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))

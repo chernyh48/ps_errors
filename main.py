@@ -28,35 +28,34 @@ try:
     result = ''
     with open('result.json', 'r', encoding='utf-8') as j:
         data_json = json.load(j)
-    for file in os.listdir(r'proxy'):
+    for file in sorted(os.listdir(r'proxy')):
         result_file = f'{file}\n'
         w = "%{http_code}"
         with open(f'proxy/{file}', 'r', encoding="utf-8") as f:
-            for i in f:
+            for line in f:
                 sleep(0.2)
-                if '#' in i:
-                    result_file += i
-                elif i != '\n' and '#' not in i:
-                    proxy_data = i.rstrip('\n').split(':')
+                if '#' in line:
+                    result_file += line
+                elif line != '\n' and '#' not in line:
+                    proxy_data = line.rstrip('\n').split(':')
                     proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                     curl_url = f'curl -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
-                               f'-w {w} https://2ip.ru'
+                               f'-w {w} https://yandex.ru/internet'
+                    print(curl_url)
                     args = shlex.split(curl_url)
                     process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     try:
                         stdout, stder = process.communicate(timeout=2)
                         data = codecs.decode(stdout)
                         if data.split('\n')[-1] != '200':
-                            print(f'{proxy.ip}:{proxy.port}')
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
-                                result_file += f'\U0000274C {i}'
+                                result_file += f'\U0000274C {line}'
                             else:
                                 if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] == 0:
                                     data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                                    result_file += f'\U000027A1 {i}'
                                 else:
                                     data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                                    result_file += f'\U0000274C {i}'
+                                    result_file += f"\U0000274C({data_json[f'{proxy.ip}:{proxy.port}']['count_error']}){line}"
                         else:
                             if f'{proxy.ip}:{proxy.port}' not in data_json:
                                 data_json[f'{proxy.ip}:{proxy.port}'] = {'date_check': datetime.datetime.now().strftime("%d.%m.%Y"),
@@ -65,22 +64,19 @@ try:
                                                                          'pass': proxy.password,
                                                                          'count_error': proxy.count_error,
                                                                          'count_rotation': proxy.count_rotation,
-                                                                         'ip_out': data.split('\n')[0]}
+                                                                         'ip_out': 0}
                             else:
                                 data_json[f'{proxy.ip}:{proxy.port}']['count_error'] = 0
                     except subprocess.TimeoutExpired:
                         if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] == 0:
                             data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                            result_file += f'\U000027A1 {i}'
                         else:
                             data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                            result_file += f'\U0000274C {i}'
-            if '\U0000274C' in result_file or '\U000027A1' in result_file:
+                            result_file += f'\U0000274C {line} {proxy.count_error}'
+            if '\U0000274C' in result_file:
                 result += result_file + '\n'
     if '\U0000274C' in result:
-        bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
-    elif '\U000027A1' in result:
-        bot.send_message(chat_id, f"```\n{result}```", parse_mode='MarkdownV2')
+        bot.send_message(chat_id, f"<pre>{result}</pre>@anton_4ch", parse_mode='HTML')
     with open('result.json', 'w', encoding='utf-8') as f:
         json.dump(data_json, f, indent=4)
 except BaseException as f:

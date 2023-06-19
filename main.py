@@ -71,7 +71,7 @@ try:
                             data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
                         else:
                             data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                            result_file += f'\U0000274C {line} {proxy.count_error}'
+                            result_file += f"\U0000274C({data_json[f'{proxy.ip}:{proxy.port}']['count_error']}){line}"
             if '\U0000274C' in result_file:
                 result += result_file + '\n'
     if '\U0000274C' in result:

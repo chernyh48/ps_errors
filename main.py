@@ -50,7 +50,7 @@ try:
                     process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     try:
 
-                        stdout, stderr = process.communicate(timeout=5)
+                        stdout, stderr = process.communicate(timeout=7)
                         data = codecs.decode(stdout)
                         error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))
                         if data == '000':

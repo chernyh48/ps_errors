@@ -31,7 +31,7 @@ class Proxy:
         else:
             if data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] <= 1:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
-                return '', data_dict
+                return '\n', data_dict
             else:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
                 return f"\U0000274C({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']})" \

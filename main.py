@@ -27,15 +27,14 @@ class Proxy:
 
     def count_errors(self, data_dict):
         if f'{self.ip}:{self.port}:{self.user}:{self.password}' not in data_dict:
-            return f'\U0000274C {self.ip}:{self.port}:{self.user}:{self.password}', data_dict
+            return f'\n\U0000274C {self.ip}:{self.port}:{self.user}:{self.password}', data_dict
         else:
             if data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] <= 1:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
                 return '\n', data_dict
             else:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
-                return f"\U0000274C ({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']}) " \
-                       f"{self.ip}:{self.port}:{self.user}:{self.password}", data_dict
+                return f"\n\U0000274C ({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']}) {self.ip}:{self.port}:{self.user}:{self.password}", data_dict
 
 
 try:

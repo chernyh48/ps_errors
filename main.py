@@ -25,16 +25,16 @@ class Proxy:
         self.password = password
         self.count_error = 0
 
-    def count_errors(self, data_dict):
+    def count_errors(self, data_dict, lines):
         if f'{self.ip}:{self.port}:{self.user}:{self.password}' not in data_dict:
-            return f'\U0000274C {self.ip}:{self.port}:{self.user}:{self.password}\n', data_dict
+            return f'\U0000274C {lines}', data_dict
         else:
             if data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] <= 1:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
                 return '\n', data_dict
             else:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
-                return f"\U0000274C ({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']}) {self.ip}:{self.port}:{self.user}:{self.password}\n", data_dict
+                return f"\U0000274C ({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']}) {lines}", data_dict
 
 
 try:
@@ -65,7 +65,7 @@ try:
                         error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))
                         if data == '000':
                             logger.warning(f'Error: {error}')
-                            result_def = proxy.count_errors(data_json)
+                            result_def = proxy.count_errors(data_json, line)
                             result_file += result_def[0]
                             data_json = result_def[1]
                         else:

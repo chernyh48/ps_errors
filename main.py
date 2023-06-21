@@ -49,6 +49,7 @@ try:
         w = "%{http_code}"
         with open(f'proxy/{file}', 'r', encoding="utf-8") as f:
             for line in f:
+                line_no_n = line.rstrip('\n')
                 if '#' in line:
                     result_file += line
                 elif line != '\n' and '#' not in line:
@@ -71,27 +72,27 @@ try:
                         else:
                             ip_out = json.loads(("\n".join(data.split("\n")[:2])[:-1] + '\n}'))["YourFuckingIPAddress"]
                             logger.info(f'{proxy.ip}:{proxy.port} is OK!')
-                            if line.rstrip() not in data_json:
-                                data_json[line.rstrip()] = {
+                            if line_no_n not in data_json:
+                                data_json[line_no_n] = {
                                     'last_time_rotation': str(datetime.datetime.now()),
                                     'count_error': 0,
                                     'ip_out': ip_out}
                             else:
-                                if ip_out != data_json[line.rstrip()]['ip_out']:
-                                    data_json[line.rstrip()] = {
+                                if ip_out != data_json[line_no_n]['ip_out']:
+                                    data_json[line_no_n] = {
                                         'last_time_rotation': str(datetime.datetime.now()),
                                         'count_error': 0,
                                         'ip_out': ip_out}
                                 else:
-                                    delta_time = datetime.datetime.now() - datetime.datetime.strptime(data_json[line]['last_time_rotation'],
+                                    delta_time = datetime.datetime.now() - datetime.datetime.strptime(data_json[line_no_n]['last_time_rotation'],
                                                                                                       '%Y-%m-%d %H:%M:%S.%f')
                                     if delta_time.seconds > 1800:
                                         logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
-                                        result_file += f'\U000026A1 ({data_json[line.rstrip()]["last_time_rotation"].strftime("%H:%M")}) {line}'
+                                        result_file += f'\U000026A1 ({data_json[line_no_n]["last_time_rotation"].strftime("%H:%M")}) {line}'
 
                     except subprocess.TimeoutExpired:
                         logger.warning(f'Timeout error: {proxy.ip}:{proxy.port}')
-                        result_def = proxy.count_errors(data_json)
+                        result_def = proxy.count_errors(data_json, line)
                         result_file += result_def[0]
                         data_json = result_def[1]
             if '\U0000274C' in result_file or '\U000026A1' in result_file:

@@ -24,7 +24,18 @@ class Proxy:
         self.user = user
         self.password = password
         self.count_error = 0
-        self.count_rotation = 0
+
+    def count_errors(self, data_dict):
+        if f'{self.ip}:{self.port}:{self.user}:{self.password}' not in data_dict:
+            return f'\U0000274C {self.ip}:{self.port}:{self.user}:{self.password}', data_dict
+        else:
+            if data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] <= 1:
+                data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
+                return '', data_dict
+            else:
+                data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
+                return f"\U0000274C({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']})" \
+                       f"{self.ip}:{self.port}:{self.user}:{self.password}", data_dict
 
 
 try:
@@ -45,50 +56,48 @@ try:
                     proxy_data = line.rstrip('\n').split(':')
                     proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                     logger.info(f'Send request from: {proxy.ip}:{proxy.port}')
-                    curl_url = f'curl -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" -w {w} https://wtfismyip.com/json'
+                    curl_url = f'curl -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
+                               f'-w {w} https://wtfismyip.com/json'
                     args = shlex.split(curl_url)
                     process = subprocess.Popen(args, shell=False, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     try:
-
-                        stdout, stderr = process.communicate(timeout=10)
+                        stdout, stderr = process.communicate(timeout=15)
                         data = codecs.decode(stdout)
                         error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))
+                        ip_out = json.loads("\n".join(data.split("\n")[:-1]))["YourFuckingIPAddress"]
                         if data == '000':
                             logger.warning(f'Error: {error}')
-                            if f'{proxy.ip}:{proxy.port}' not in data_json:
-                                result_file += f'\U0000274C {line}'
-                            else:
-                                if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] <= 1:
-                                    data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                                else:
-                                    data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                                    result_file += f"\U0000274C({data_json[f'{proxy.ip}:{proxy.port}']['count_error']}){line}"
+                            result_def = proxy.count_errors(data_json)
+                            result_file += result_def[0]
+                            data_json = result_def[1]
                         else:
-                            if f'{proxy.ip}:{proxy.port}' not in data_json:
-                                data_json[f'{proxy.ip}:{proxy.port}'] = {
-                                    'date_check': datetime.datetime.now().strftime("%d.%m.%Y"),
-                                    'time_check': datetime.datetime.now().strftime("%H:%M"),
-                                    'login': proxy.user,
-                                    'pass': proxy.password,
-                                    'count_error': proxy.count_error,
-                                    'count_rotation': proxy.count_rotation,
-                                    'ip_out': 0}
-                            else:
+                            if line not in data_json:
+                                data_json[line] = {
+                                    'last_time_rotation': str(datetime.datetime.now()),
+                                    'count_error': 0,
+                                    'ip_out': ip_out}
                                 logger.info(f'{proxy.ip}:{proxy.port} is OK!')
-                                data_json[f'{proxy.ip}:{proxy.port}']['count_error'] = 0
+                            else:
+                                if ip_out != data_json[line]['ip_out']:
+                                    data_json[line] = {
+                                        'last_time_rotation': datetime.datetime.now(),
+                                        'count_error': 0,
+                                        'ip_out': ip_out}
+                                else:
+                                    delta_time = datetime.datetime.now() - datetime.datetime.strptime(data_json[line]['last_time_rotation'],
+                                                                                                      '%Y-%m-%d %H:%M:%S.%f')
+                                    if delta_time.seconds > 1800:
+                                        logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
+                                        result_file += f'\U000026A1 ({data_json[line]["last_time_rotation"].strftime("%H:%M")}) {line}'
+
                     except subprocess.TimeoutExpired:
                         logger.warning(f'Timeout error: {proxy.ip}:{proxy.port}')
-                        if f'{proxy.ip}:{proxy.port}' not in data_json:
-                            result_file += f'\U0000274C {line}'
-                        else:
-                            if data_json[f'{proxy.ip}:{proxy.port}']['count_error'] <= 1:
-                                data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                            else:
-                                data_json[f'{proxy.ip}:{proxy.port}']['count_error'] += 1
-                                result_file += f"\U0000274C({data_json[f'{proxy.ip}:{proxy.port}']['count_error']}){line}"
-            if '\U0000274C' in result_file:
+                        result_def = proxy.count_errors(data_json)
+                        result_file += result_def[0]
+                        data_json = result_def[1]
+            if '\U0000274C' in result_file or '\U000026A1' in result_file:
                 result += result_file + '\n'
-    if '\U0000274C' in result:
+    if '\U0000274C' in result or '\U000026A1' in result:
         bot.send_message(chat_id, f"<pre>{result}</pre>@anton_4ch", parse_mode='HTML')
         logger.info('Message sent to telegram')
     with open('result.json', 'w', encoding='utf-8') as f:

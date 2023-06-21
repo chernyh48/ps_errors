@@ -86,6 +86,7 @@ try:
                                 else:
                                     delta_time = datetime.datetime.now() - datetime.datetime.strptime(data_json[line_no_n]['last_time_rotation'],
                                                                                                       '%Y-%m-%d %H:%M:%S.%f')
+                                    data_json[line_no_n] = {'count_error': 0}
                                     if delta_time.seconds > 1800:
                                         logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
                                         result_file += f'\U000026A1 ({data_json[line_no_n]["last_time_rotation"].strftime("%H:%M")}) {line}'

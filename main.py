@@ -71,6 +71,7 @@ for file in sorted(os.listdir(r'proxy')):
                         data_json = result_def[1]
                     else:
                         ip_out = json.loads("\n".join(data.split("\n")[:-1]))["YourFuckingIPAddress"]
+                        print(ip_out)
                         logger.info(f'{proxy.ip}:{proxy.port} is OK!')
                         if line not in data_json:
                             data_json[line] = {

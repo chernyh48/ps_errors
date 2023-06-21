@@ -31,7 +31,7 @@ class Proxy:
         else:
             if data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] <= 1:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
-                return '\n', data_dict
+                return '', data_dict
             else:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
                 return f"\U0000274C ({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']}) {lines}", data_dict
@@ -84,12 +84,11 @@ try:
                                         'count_error': 0,
                                         'ip_out': ip_out}
                                 else:
-                                    delta_time = datetime.datetime.now() - datetime.datetime.strptime(data_json[line_no_n]['last_time_rotation'],
-                                                                                                      '%Y-%m-%d %H:%M:%S.%f')
+                                    delta_time = datetime.datetime.now() - datetime.datetime.strptime(data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S.%f')
                                     data_json[line_no_n]['count_error'] = 0
                                     if delta_time.seconds > 1800:
                                         logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
-                                        result_file += f'\U000026A1 ({data_json[line_no_n]["last_time_rotation"].strftime("%H:%M")}) {line}'
+                                        result_file += f'\U000026A1 ({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M")}) {line}'
 
                     except subprocess.TimeoutExpired:
                         logger.warning(f'Timeout error: {proxy.ip}:{proxy.port}')

@@ -71,7 +71,6 @@ try:
                             data_json = result_def[1]
                         else:
                             ip_out = json.loads(("\n".join(data.split("\n")[:2])[:-1] + '\n}'))["YourFuckingIPAddress"]
-                            print(ip_out)
                             logger.info(f'{proxy.ip}:{proxy.port} is OK!')
                             if line not in data_json:
                                 data_json[line] = {

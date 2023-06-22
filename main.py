@@ -27,14 +27,14 @@ class Proxy:
 
     def count_errors(self, data_dict, lines):
         if f'{self.ip}:{self.port}:{self.user}:{self.password}' not in data_dict:
-            return f'\U0000274C {lines}', data_dict
+            return f'\U0000274C{lines}', data_dict
         else:
             if data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] <= 1:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
                 return '', data_dict
             else:
                 data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error'] += 1
-                return f"\U0000274C ({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']}) {lines}", data_dict
+                return f"\U0000274C({data_dict[f'{self.ip}:{self.port}:{self.user}:{self.password}']['count_error']}){lines}", data_dict
 
 
 try:
@@ -88,7 +88,7 @@ try:
                                     data_json[line_no_n]['count_error'] = 0
                                     if delta_time.seconds > 1800:
                                         logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
-                                        result_file += f'\U000026A1 ({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M")}) {line}'
+                                        result_file += f'\U000026A1({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M")}){line}'
 
                     except subprocess.TimeoutExpired:
                         logger.warning(f'Timeout error: {proxy.ip}:{proxy.port}')
@@ -98,7 +98,7 @@ try:
             if '\U0000274C' in result_file or '\U000026A1' in result_file:
                 result += result_file + '\n'
     if '\U0000274C' in result or '\U000026A1' in result:
-        bot.send_message(chat_id, f"<pre>{result}</pre>@anton_4ch", parse_mode='HTML')
+        bot.send_message(chat_id, f"<pre>{result}</pre>", parse_mode='HTML')
         logger.info('Message sent to telegram')
     with open('result.json', 'w', encoding='utf-8') as f:
         json.dump(data_json, f, indent=4)

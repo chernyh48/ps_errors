@@ -4,7 +4,6 @@ import re
 from loguru import logger
 import telebot
 import codecs
-import subprocess
 from config import *
 import os
 import datetime
@@ -85,7 +84,7 @@ async def body(file_f):
                                 if delta_time.seconds > time_rotation:
                                     logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
                                     result_file += f'\U000026A1({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M")}){line}'
-                except subprocess.TimeoutExpired:
+                except asyncio.TimeoutError:
                     logger.warning(f'Timeout error: {proxy.ip}:{proxy.port}')
                     result_file += proxy.count_errors(line)
         return result_file

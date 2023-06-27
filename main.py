@@ -1,12 +1,14 @@
 import asyncio
-import json
-import re
-from loguru import logger
-import telebot
 import codecs
-from config import *
-import os
 import datetime
+import json
+import os
+import re
+
+import telebot
+from loguru import logger
+
+from config import *
 
 API_TOKEN = API_TOKEN
 bot = telebot.TeleBot(API_TOKEN)
@@ -52,41 +54,37 @@ async def body(file_f):
                 proxy_data = line.rstrip('\n').split(':')
                 proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                 logger.info(f'Send request from: {proxy.ip}:{proxy.port}')
-                curl_url = f'curl -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
+                curl_url = f'curl --connect-timeout 15 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
                            f'-w {w} https://wtfismyip.com/json'
-                process = await asyncio.create_subprocess_shell(curl_url, stdout=asyncio.subprocess.PIPE,
-                                                                stderr=asyncio.subprocess.PIPE)
-                try:
-                    stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=15)
-                    data = codecs.decode(stdout)
-                    error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))
-                    if data == '000':
-                        logger.warning(f'Error: {error}')
-                        result_file += proxy.count_errors(line)
+                process = await asyncio.create_subprocess_shell(curl_url, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+                stdout, stderr = await process.communicate()
+                data = codecs.decode(stdout)
+                error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))
+                if data == '000':
+                    logger.warning(f'Error: {error}')
+                    result_file += proxy.count_errors(line)
+                else:
+                    ip_out = json.loads(("\n".join(data.split("\n")[:2])[:-1] + '\n}'))["YourFuckingIPAddress"]
+                    logger.info(f'{proxy.ip}:{proxy.port} is OK!')
+                    if line_no_n not in data_json:
+                        data_json[line_no_n] = {
+                            'last_time_rotation': str(datetime.datetime.now()),
+                            'count_error': 0,
+                            'ip_out': ip_out}
                     else:
-                        ip_out = json.loads(("\n".join(data.split("\n")[:2])[:-1] + '\n}'))["YourFuckingIPAddress"]
-                        logger.info(f'{proxy.ip}:{proxy.port} is OK!')
-                        if line_no_n not in data_json:
+                        if ip_out != data_json[line_no_n]['ip_out']:
                             data_json[line_no_n] = {
                                 'last_time_rotation': str(datetime.datetime.now()),
                                 'count_error': 0,
                                 'ip_out': ip_out}
                         else:
-                            if ip_out != data_json[line_no_n]['ip_out']:
-                                data_json[line_no_n] = {
-                                    'last_time_rotation': str(datetime.datetime.now()),
-                                    'count_error': 0,
-                                    'ip_out': ip_out}
-                            else:
-                                delta_time = datetime.datetime.now() - datetime.datetime.strptime(
-                                    data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S.%f')
-                                data_json[line_no_n]['count_error'] = 0
-                                if delta_time.seconds > time_rotation:
-                                    logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
-                                    result_file += f'\U000026A1({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M")}){line}'
-                except asyncio.TimeoutError:
-                    logger.warning(f'Timeout error: {proxy.ip}:{proxy.port}')
-                    result_file += proxy.count_errors(line)
+                            delta_time = datetime.datetime.now() - datetime.datetime.strptime(
+                                data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S.%f')
+                            data_json[line_no_n]['count_error'] = 0
+                            if delta_time.seconds > time_rotation:
+                                logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
+                                result_file += f'\U000026A1({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M")}){line}'
         return result_file
 
 

@@ -54,7 +54,7 @@ async def body(file_f):
                 proxy_data = line.rstrip('\n').split(':')
                 proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                 logger.info(f'Send request from: {proxy.ip}:{proxy.port}')
-                curl_url = f'curl --connect-timeout 15 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
+                curl_url = f'curl --connect-timeout 10 --max-time 15 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
                            f'-w {w} https://wtfismyip.com/json'
                 process = await asyncio.create_subprocess_shell(curl_url, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 

@@ -107,6 +107,9 @@ async def main():
         if '\U0000274C' in result or '\U000026A1' in result:
             bot.send_message(chat_id, f"<pre>{result}</pre>", parse_mode='HTML')
             logger.info('Message sent to telegram')
+    except IndexError:
+        bot.send_message(chat_id, f'\u2757\u2757\u2757 Script error: INCORRECT PROXY FORMAT')
+        logger.warning('Message ERROR sent to telegram')
     except BaseException as e:
         bot.send_message(chat_id, f'\u2757\u2757\u2757 Script error: {e}')
         logger.warning('Message ERROR sent to telegram')

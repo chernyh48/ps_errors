@@ -68,7 +68,7 @@ async def body(file_f):
                     try:
                         ip_out = json.loads(("\n".join(data.split("\n")[:2])[:-1] + '\n}'))["YourFuckingIPAddress"]
                     except BaseException:
-                        bot.send_message(chat_id, data)
+                        bot.send_message(chat_id, f'{proxy.ip, data, error}')
                     logger.info(f'{proxy.ip}:{proxy.port} is OK!')
                     if line_no_n not in data_json:
                         data_json[line_no_n] = {

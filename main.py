@@ -67,17 +67,14 @@ async def body(file_f):
                         else:
                             ip_out = json.loads('{\n' + data.split('\n')[1][:-1] + '\n}')["YourFuckingIPAddress"]
                             logger.info(f'{proxy.ip}:{proxy.port} is OK!')
-                            if line_no_n not in data_json:
+                            if line_no_n not in data_json or ip_out != data_json[line_no_n]['ip_out']:
                                 data_json[line_no_n] = {
                                     'last_time_rotation': str(datetime.datetime.now()),
                                     'count_error': 0,
                                     'ip_out': ip_out}
                             else:
-                                if ip_out != data_json[line_no_n]['ip_out']:
-                                    data_json[line_no_n] = {
-                                        'last_time_rotation': str(datetime.datetime.now()),
-                                        'count_error': 0,
-                                        'ip_out': ip_out}
+                                if file_f[:1].lower() == 'nr':
+                                    pass
                                 else:
                                     delta_time = datetime.datetime.now() - datetime.datetime.strptime(
                                         data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S.%f')

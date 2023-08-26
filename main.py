@@ -73,9 +73,7 @@ async def body(file_f):
                                     'count_error': 0,
                                     'ip_out': ip_out}
                             else:
-                                if file_f[:1].lower() == 'nr':
-                                    pass
-                                else:
+                                if file_f[:2].lower() != 'nr_':
                                     delta_time = datetime.datetime.now() - datetime.datetime.strptime(
                                         data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S.%f')
                                     data_json[line_no_n]['count_error'] = 0

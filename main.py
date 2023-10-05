@@ -75,11 +75,11 @@ async def body(file_f):
                             else:
                                 if file_f[:2].lower() != 'nr_':
                                     delta_time = datetime.datetime.now() - datetime.datetime.strptime(
-                                        data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S:%f')
+                                        data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S')
                                     data_json[line_no_n]['count_error'] = 0
                                     if delta_time.seconds > time_rotation:
                                         logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
-                                        result_file += f'\U000026A1({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S").strftime("%H:%M")}){line}'
+                                        result_file += f'\U000026A1({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M")}){line}'
                 except IndexError:
                     result_file += f'\u2757\u2757\u2757 Script error: INCORRECT PROXY FORMAT: {line}'
                     logger.warning('Message ERROR add to result')

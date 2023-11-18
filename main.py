@@ -12,6 +12,7 @@ from config import *
 API_TOKEN = API_TOKEN
 bot = telebot.TeleBot(API_TOKEN)
 chat_id = chat_id
+chat_id_mobile = chat_id_mobile
 time_rotation = time_rotation
 count_error = count_error
 logger.add("logs/debug.log", format="{time:[YYYY.MM.DD hh:mm:ss:SSS]}[{level}] {message}",
@@ -60,7 +61,6 @@ async def body(file_f):
                         stdout, stderr = await process.communicate()
                         data = codecs.decode(stdout)
                         error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))
-
                         if error:
                             logger.warning(f'Error: {error}')
                             result_file += proxy.count_errors(line)
@@ -73,7 +73,7 @@ async def body(file_f):
                                     'count_error': 0,
                                     'ip_out': ip_out}
                             else:
-                                if file_f[:2].lower() != 'nr_':
+                                if 'mobile' not in file_f:
                                     delta_time = datetime.datetime.now() - datetime.datetime.strptime(
                                         data_json[line_no_n]['last_time_rotation'], '%Y-%m-%d %H:%M:%S:%f')
                                     data_json[line_no_n]['count_error'] = 0
@@ -93,20 +93,33 @@ async def main():
     try:
         logger.info('Script started')
         result = ''
+        result_mobile = ''
         futures = [asyncio.create_task(body(file)) for file in sorted(os.listdir(r'proxy'))]
         result_files = await asyncio.gather(*futures)
         for result_file in result_files:
-            if '\U0000274C' in result_file or '\U000026A1' in result_file or '\u2757' in result_file:
-                if len(result + result_file) > 4096:
-                    bot.send_message(chat_id, f"<pre>{result}</pre>", parse_mode='HTML')
-                    result = result_file + '\n'
-                else:
-                    result += result_file + '\n'
-        if '\U0000274C' in result or '\U000026A1' in result or '\u2757' in result:
+            if 'mobile' in result_file:
+                if '\U0000274C' in result_file or '\U000026A1' in result_file or '\u2757' in result_file:
+                    if len(result_mobile + result_file) > 4096:
+                        bot.send_message(chat_id_mobile, f"<pre>{result_mobile}</pre>", parse_mode='HTML')
+                        result_mobile = result_file + '\n'
+                    else:
+                        result_mobile += result_file + '\n'
+            else:
+                if '\U0000274C' in result_file or '\U000026A1' in result_file or '\u2757' in result_file:
+                    if len(result + result_file) > 4096:
+                        bot.send_message(chat_id, f"<pre>{result}</pre>", parse_mode='HTML')
+                        result = result_file + '\n'
+                    else:
+                        result += result_file + '\n'
+        if result != '':
             bot.send_message(chat_id, f"<pre>{result}</pre>", parse_mode='HTML')
-            logger.info('Message sent to telegram')
+            logger.info('Message sent to telegram PS: Errors')
+        if result_mobile != '':
+            bot.send_message(chat_id_mobile, f"<pre>{result_mobile}</pre>", parse_mode='HTML')
+            logger.info('Message sent to telegram PS: Errors')
     except BaseException as e:
         bot.send_message(chat_id, f'\u2757\u2757\u2757 Script error: {e}')
+        bot.send_message(chat_id_mobile, f'\u2757\u2757\u2757 Script error: {e}')
         logger.warning('Message ERROR sent to telegram')
 
 

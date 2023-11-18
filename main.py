@@ -98,7 +98,7 @@ async def main():
         result_files = await asyncio.gather(*futures)
         for result_file in result_files:
             if 'mobile' in result_file:
-                if '\U0000274C' in result_file or '\U000026A1' in result_file or '\u2757' in result_file:
+                if '\U0000274C' in result_file or '\u2757' in result_file:
                     if len(result_mobile + result_file) > 4096:
                         bot.send_message(chat_id_mobile, f"<pre>{result_mobile}</pre>", parse_mode='HTML')
                         result_mobile = result_file + '\n'

@@ -5,6 +5,7 @@ import json
 import os
 import re
 import telebot
+from bs4 import BeautifulSoup
 from loguru import logger
 
 from config import *
@@ -55,8 +56,12 @@ async def body(file_f):
                         proxy_data = line.rstrip('\n').split(':')
                         proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                         logger.info(f'Send request from: {proxy.ip}:{proxy.port}')
-                        curl_url = f'curl --connect-timeout 10 --max-time 15 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
-                                   f'https://wtfismyip.com/json'
+                        if 'mobile' not in file_f:
+                            curl_url = f'curl --connect-timeout 10 --max-time 15 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
+                                       f'https://wtfismyip.com/json'
+                        else:
+                            curl_url = f'curl --connect-timeout 10 --max-time 15 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
+                                       f'https://yandex.ru/internet'
                         process = await asyncio.create_subprocess_shell(curl_url, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
                         stdout, stderr = await process.communicate()
                         data = codecs.decode(stdout)
@@ -65,7 +70,11 @@ async def body(file_f):
                             logger.warning(f'Error: {error}')
                             result_file += proxy.count_errors(line)
                         else:
-                            ip_out = json.loads('{\n' + data.split('\n')[1][:-1] + '\n}')["YourFuckingIPAddress"]
+                            if 'mobile' not in file_f:
+                                ip_out = json.loads('{\n' + data.split('\n')[1][:-1] + '\n}')["YourFuckingIPAddress"]
+                            else:
+                                parsing = BeautifulSoup(data, 'lxml').find('h3', class_='parameter-header__title')
+                                ip_out = parsing.find_next().text
                             logger.info(f'{proxy.ip}:{proxy.port} is OK!')
                             if line_no_n not in data_json or ip_out != data_json[line_no_n]['ip_out']:
                                 data_json[line_no_n] = {
@@ -98,6 +107,7 @@ async def main():
         result_files = await asyncio.gather(*futures)
         for result_file in result_files:
             if 'mobile' in result_file:
+                print(result_file)
                 if '\U0000274C' in result_file or '\u2757' in result_file:
                     if len(result_mobile + result_file) > 4096:
                         bot.send_message(chat_id_mobile, f"<pre>{result_mobile}</pre>", parse_mode='HTML')
@@ -116,7 +126,7 @@ async def main():
             logger.info('Message sent to telegram PS: Errors')
         if result_mobile != '':
             bot.send_message(chat_id_mobile, f"<pre>{result_mobile}</pre>", parse_mode='HTML')
-            logger.info('Message sent to telegram PS: Errors')
+            logger.info('Message sent to telegram PS: Errors_Mobile')
     except BaseException as e:
         bot.send_message(chat_id, f'\u2757\u2757\u2757 Script error: {e}')
         bot.send_message(chat_id_mobile, f'\u2757\u2757\u2757 Script error: {e}')

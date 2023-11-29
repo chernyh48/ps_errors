@@ -72,10 +72,11 @@ async def body(file_f):
                         else:
                             if 'mobile' not in file_f:
                                 ip_out = json.loads('{\n' + data.split('\n')[1][:-1] + '\n}')["YourFuckingIPAddress"]
+                                logger.info(f'{proxy.ip}:{proxy.port} is OK!')
                             else:
                                 parsing = BeautifulSoup(data, 'lxml').find('h3', class_='parameter-header__title')
                                 ip_out = parsing.find_next().text
-                            logger.info(f'{proxy.ip}:{proxy.port} is OK!')
+                                logger.info(f'{proxy.ip}:{proxy.port} is OK!')
                             if line_no_n not in data_json or ip_out != data_json[line_no_n]['ip_out']:
                                 data_json[line_no_n] = {
                                     'last_time_rotation': str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')),
@@ -89,6 +90,8 @@ async def body(file_f):
                                     if delta_time.seconds > time_rotation:
                                         logger.warning(f'No rotation 30 minutes: {proxy.ip}:{proxy.port}')
                                         result_file += f'\U000026A1({datetime.datetime.strptime(data_json[line_no_n]["last_time_rotation"], "%Y-%m-%d %H:%M:%S:%f").strftime("%H:%M")}){line}'
+                                else:
+                                    data_json[line_no_n]['count_error'] = 0
                 except IndexError:
                     result_file += f'\u2757\u2757\u2757 Script error: INCORRECT PROXY FORMAT: {line}'
                     logger.warning('Message ERROR add to result')
@@ -107,7 +110,6 @@ async def main():
         result_files = await asyncio.gather(*futures)
         for result_file in result_files:
             if 'mobile' in result_file:
-                print(result_file)
                 if '\U0000274C' in result_file or '\u2757' in result_file:
                     if len(result_mobile + result_file) > 4096:
                         bot.send_message(chat_id_mobile, f"<pre>{result_mobile}</pre>", parse_mode='HTML')

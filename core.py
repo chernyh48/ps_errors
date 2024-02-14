@@ -2,6 +2,7 @@ import asyncio
 import codecs
 import datetime
 import json
+import os
 import re
 import telebot
 from bs4 import BeautifulSoup
@@ -45,7 +46,7 @@ async def body(direct, file_f):
     global data_json
     logger.info(f'{file_f} processing start')
     result_file = f'{file_f}\n'
-    with open(f'{direct}/{file_f}', 'r', encoding="utf-8") as file:
+    with open(os.path.abspath(f'{direct}/{file_f}'), 'r', encoding="utf-8") as file:
         try:
             for line in file:
                 try:
@@ -102,7 +103,7 @@ async def body(direct, file_f):
 
 
 async def check(direct, files):
-    with open('result.json', 'r', encoding='utf-8') as j:
+    with open(os.path.abspath('result.json'), 'r', encoding='utf-8') as j:
         global data_json
         data_json = json.load(j)
         logger.info('Dump loaded')
@@ -138,6 +139,6 @@ async def check(direct, files):
         bot.send_message(chat_id_mobile, f'\u2757\u2757\u2757 Script error: {e}')
         logger.warning('Message ERROR sent to telegram')
 
-    with open('result.json', 'w', encoding='utf-8') as f:
+    with open(os.path.abspath('result.json'), 'w', encoding='utf-8') as f:
         json.dump(data_json, f, indent=4)
         logger.info('Dump saved')

@@ -103,7 +103,7 @@ async def body(direct, file_f):
 
 
 async def check(direct, files):
-    with open(os.path.abspath('result.json'), 'r', encoding='utf-8') as j:
+    with open(PATH_RESULT, 'r', encoding='utf-8') as j:
         global data_json
         data_json = json.load(j)
         logger.info('Dump loaded')
@@ -139,6 +139,6 @@ async def check(direct, files):
         bot.send_message(chat_id_mobile, f'\u2757\u2757\u2757 Script error: {e}')
         logger.warning('Message ERROR sent to telegram')
 
-    with open(os.path.abspath('result.json'), 'w', encoding='utf-8') as f:
+    with open(PATH_RESULT, 'w', encoding='utf-8') as f:
         json.dump(data_json, f, indent=4)
         logger.info('Dump saved')

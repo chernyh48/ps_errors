@@ -17,7 +17,7 @@ def handle_docs_proxy(message):
         with open(file, 'wb') as new_file:
             new_file.write(proxy)
         bot.reply_to(message, f'start check {message.document.file_name}')
-        asyncio.run(check('check/', os.listdir(r'check')))
+        asyncio.run(check('check/', os.listdir(os.path.abspath(r'check'))))
         bot.reply_to(message, f'finish check {message.document.file_name}')
         os.remove(file)
     except Exception as e:

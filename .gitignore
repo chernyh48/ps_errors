@@ -1,7 +1,9 @@
 .idea/
-proxy/proxy.txt
+.proxy/
 config.py
 __pycache__/
 /proxy/
 /result.json
 /logs/
+check_proxy.txt
+

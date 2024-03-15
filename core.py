@@ -123,7 +123,7 @@ async def check(direct, files):
                         result_mobile += result_file + '\n'
             else:
                 if '\U0000274C' in result_file or '\U000026A1' in result_file or '\u2757' in result_file:
-                    if len(result + result_file) > 4096:
+                    while len(result + result_file) > 4096:
                         bot.send_message(chat_id, f"<pre>{result}</pre>", parse_mode='HTML')
                         result = result_file + '\n'
                     else:

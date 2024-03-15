@@ -57,12 +57,12 @@ async def body(direct, file_f):
                         proxy_data = line.rstrip('\n').split(':')
                         proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                         logger.info(f'Send request from: {proxy.ip}:{proxy.port}')
-                        if 'mobile' not in file_f:
-                            curl_url = f'curl --connect-timeout 7 --max-time 12 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
-                                       f'https://wtfismyip.com/json'
-                        else:
-                            curl_url = f'curl --connect-timeout 7 --max-time 12 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
-                                       f'https://yandex.ru/internet'
+                        #if 'mobile' not in file_f:
+                        curl_url = f'curl --connect-timeout 7 --max-time 12 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
+                                   f'https://wtfismyip.com/json'
+                        # else:
+                        #     curl_url = f'curl --connect-timeout 7 --max-time 12 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
+                        #                f'https://yandex.ru/internet'
                         process = await asyncio.create_subprocess_shell(curl_url, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
                         stdout, stderr = await process.communicate()
                         data = codecs.decode(stdout)
@@ -71,13 +71,13 @@ async def body(direct, file_f):
                             logger.warning(f'Error: {error}')
                             result_file += proxy.count_errors(line)
                         else:
-                            if 'mobile' not in file_f:
-                                ip_out = json.loads('{\n' + data.split('\n')[1][:-1] + '\n}')["YourFuckingIPAddress"]
-                                logger.info(f'{proxy.ip}:{proxy.port} is OK!')
-                            else:
-                                parsing = BeautifulSoup(data, 'lxml').find('h3', class_='parameter-header__title')
-                                ip_out = parsing.find_next().text
-                                logger.info(f'{proxy.ip}:{proxy.port} is OK!')
+                            # if 'mobile' not in file_f:
+                            ip_out = json.loads('{\n' + data.split('\n')[1][:-1] + '\n}')["YourFuckingIPAddress"]
+                            logger.info(f'{proxy.ip}:{proxy.port} is OK!')
+                            # else:
+                            #     parsing = BeautifulSoup(data, 'lxml').find('h3', class_='parameter-header__title')
+                            #     ip_out = parsing.find_next().text
+                            #     logger.info(f'{proxy.ip}:{proxy.port} is OK!')
                             if line_no_n not in data_json or ip_out != data_json[line_no_n]['ip_out']:
                                 data_json[line_no_n] = {
                                     'last_time_rotation': str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:%f')),

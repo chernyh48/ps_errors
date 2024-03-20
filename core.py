@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 from loguru import logger
 from config import *
 
-
 API_TOKEN = API_TOKEN
 bot = telebot.TeleBot(API_TOKEN)
 chat_id = chat_id
@@ -57,13 +56,14 @@ async def body(direct, file_f):
                         proxy_data = line.rstrip('\n').split(':')
                         proxy = Proxy(proxy_data[0], proxy_data[1], proxy_data[2], proxy_data[3])
                         logger.info(f'Send request from: {proxy.ip}:{proxy.port}')
-                        #if 'mobile' not in file_f:
+                        # if 'mobile' not in file_f:
                         curl_url = f'curl --connect-timeout 7 --max-time 12 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
                                    f'https://wtfismyip.com/json'
                         # else:
                         #     curl_url = f'curl --connect-timeout 7 --max-time 12 -x "http://{proxy.user}:{proxy.password}@{proxy.ip}:{proxy.port}" ' \
                         #                f'https://yandex.ru/internet'
-                        process = await asyncio.create_subprocess_shell(curl_url, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                        process = await asyncio.create_subprocess_shell(curl_url, stdout=asyncio.subprocess.PIPE,
+                                                                        stderr=asyncio.subprocess.PIPE)
                         stdout, stderr = await process.communicate()
                         data = codecs.decode(stdout)
                         error = re.findall(r"curl:[^\r\n]*", codecs.decode(stderr))
@@ -123,7 +123,7 @@ async def check(direct, files):
                         result_mobile += result_file + '\n'
             else:
                 if '\U0000274C' in result_file or '\U000026A1' in result_file or '\u2757' in result_file:
-                    while len(result + result_file) > 4096:
+                    if len(result + result_file) > 4096:
                         bot.send_message(chat_id, f"<pre>{result}</pre>", parse_mode='HTML')
                         result = result_file + '\n'
                     else:

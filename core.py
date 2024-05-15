@@ -101,8 +101,8 @@ async def body(direct, file_f):
                     result_file += f'\u2757\u2757\u2757 Script error: INCORRECT PROXY FORMAT: {line}'
                     logger.warning('Message ERROR add to result')
         except BaseException as e:
-            result_file += f'\u2757\u2757\u2757 Script error: {e, data}'
-            logger.warning('Message ERROR add to result')
+            result_file += f'\u2757\u2757\u2757 Script error: {e}'
+            logger.warning('Message ERROR add to result', data)
         return result_file
 
 
